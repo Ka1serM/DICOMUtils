@@ -1,0 +1,85 @@
+name: Build all executables
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  windows-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install pydicom
+          pip install numpy
+          pip install Pillow
+
+      - name: Build dicom_extract_slices.exe
+        run: pyinstaller --onefile dicom_extract_slices.py
+
+      - name: Upload dicom_extract_slices.exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: dicom_extract_slices-windows
+          path: dist/dicom_extract_slices.exe
+
+      - name: Build dicom_export_atlas.exe
+        run: pyinstaller --onefile dicom_export_atlas.py
+
+      - name: Upload dicom_export_atlas.exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: dicom_export_atlas-windows
+          path: dist/dicom_export_atlas.exe
+
+  mac-build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install pydicom
+          pip install numpy
+          pip install Pillow
+
+      - name: Build dicom_extract_slices (macOS)
+        run: pyinstaller --onefile dicom_extract_slices.py
+
+      - name: Zip dicom_extract_slices (macOS)
+        run: zip -r dist/dicom_extract_slices-mac.zip dist/dicom_extract_slices
+
+      - name: Upload dicom_extract_slices (macOS)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dicom_extract_slices-mac
+          path: dist/dicom_extract_slices-mac.zip
+
+      - name: Build dicom_export_atlas (macOS)
+        run: pyinstaller --onefile dicom_export_atlas.py
+
+      - name: Zip dicom_export_atlas (macOS)
+        run: zip -r dist/dicom_export_atlas-mac.zip dist/dicom_export_atlas
+
+      - name: Upload dicom_export_atlas (macOS)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dicom_export_atlas-mac
+          path: dist/dicom_export_atlas-mac.zip
